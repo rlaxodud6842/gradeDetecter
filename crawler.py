@@ -5,7 +5,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.alert import Alert
-
+import tempfile
 
 class Crawler:
     def __init__(self, user_id, user_passwd, user_name):
@@ -31,9 +31,15 @@ class Crawler:
             "--force-device-scale-factor=0.67"
         )  # 67% 축소 7개 과목은 100%에서 다 표시되지 않기에.
         options.add_argument("window-size=5000, 5000")
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--disable-gpu')
+        options.add_argument('--disable-software-rasterizer')
+        temp_profile = tempfile.mkdtemp()
+        options.add_argument(f'--user-data-dir={temp_profile}')
+
         driver = webdriver.Chrome(options=options)
         driver.set_window_size(5000, 5000)
-
         URL = "https://sso.daegu.ac.kr/dgusso/ext/tigersstd/login_form.do?Return_Url=https://tigersstd.daegu.ac.kr/nxrun/ssoLogin.jsp"
         driver.get(URL)
         print("로그인 시작")
@@ -84,17 +90,14 @@ class Crawler:
             By.XPATH,
             '//*[@id="Mainframe.VFrameSet.HFrameSet.LeftFrame.form.tabMenu.tabMnu.form.grdMnLeft.body.gridrow_17.cell_17_0.celltreeitem.treeitemtext:text"]',
         ).click()
-        time.sleep(3)
+        wait = WebDriverWait(driver, 10)  # 최대 10초 대기
 
-        alert = Alert(driver)
+        alert = wait.until(EC.alert_is_present())  # alert이 뜰 때까지 기다림
         alert.accept()  # OK 클릭
-
         time.sleep(3)
 
-        alert = Alert(driver)
+        alert = wait.until(EC.alert_is_present())  # 두 번째 alert도 기다려서
         alert.accept()  # OK 클릭
-
-        time.sleep(3)
 
         data = []
 

@@ -56,8 +56,5 @@ while True:
             message += "\n".join(f"• {subject}" for subject in new_subjects)
             send_telegram_message(token, chat_id, message)
         print(new_subjects)
-        message = "test!"
-        send_telegram_message(token, chat_id, message)
 
-    print("⏳ 대기 중: 3시간")
-    time.sleep(30 * 1)  # 3분
+    time.sleep(60 * 60 * 3)  # 3분
