@@ -9,7 +9,6 @@ RUN apt-get update && apt-get install -y \
     chromium-driver \
     libglib2.0-0 \
     libnss3 \
-    libgconf-2-4 \
     libx11-xcb1 \
     libxcomposite1 \
     libxdamage1 \
