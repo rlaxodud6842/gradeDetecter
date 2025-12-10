@@ -4,23 +4,37 @@ import time
 import crawler
 from crawler import Crawler
 from dotenv import load_dotenv
-
-
-load_dotenv()
 import requests
 
-# .env로 설정해야 하는 부분.
-token = os.getenv("token")
-chat_id = os.getenv("chat_id")
+load_dotenv()
 
+# 웹훅 URL 읽기
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 
-def send_telegram_message(token, chat_id, text):
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = {"chat_id": chat_id, "text": text}
-    response = requests.post(url, data=payload)
+# ================================
+# Discord Webhook 전송 함수
+# ================================
+def send_discord_message(webhook_url, user_name, subjects):
+    embed = {
+        "title": "📘 새로운 성적이 등록되었습니다!",
+        "description": f"**{user_name}님**, 아래 과목이 새롭게 등록되었습니다:\n\n[확인하러가기](https://sso.daegu.ac.kr/dgusso/ext/tigersstd/login_form.do?Return_Url=https://tigersstd.daegu.ac.kr/nxrun/ssoLogin.jsp) \n\n"
+                       + "\n".join(f"• **{subject}**" for subject in subjects),
+        "color": 0x2ecc71  # 초록색
+    }
+
+    payload = {
+        "embeds": [embed]
+    }
+
+    headers = {"Content-Type": "application/json"}
+
+    response = requests.post(webhook_url, data=json.dumps(payload), headers=headers)
     return response
 
 
+# ================================
+# 사용자 목록 로딩 (.env 기반)
+# ================================
 user_arr = []
 
 i = 1
@@ -28,7 +42,6 @@ while True:
     user_key = f"USER{i}"
     user_json = os.getenv(user_key)
     if user_json is None:
-        # 더 이상 유저 데이터가 없으면 종료
         break
 
     try:
@@ -45,6 +58,10 @@ while True:
     user_arr.append(Crawler(user_id, user_passwd, user_name))
     i += 1
 
+
+# ================================
+# 메인 루프
+# ================================
 while True:
     print("🔍 새 데이터 확인 시작")
 
@@ -52,9 +69,11 @@ while True:
 
         new_subjects = crawler.craw()  # 새로 생긴 과목 리스트 반환
         if new_subjects:
-            message = f"📢 [{crawler.get_user_name()}]님! 새로운 과목이 성적 등록되었습니다:\n"
+            message = f"📢 **[{crawler.get_user_name()}]님! 새로운 성적이 등록되었습니다!**\n"
             message += "\n".join(f"• {subject}" for subject in new_subjects)
-            send_telegram_message(token, chat_id, message)
+
+            send_discord_message(WEBHOOK_URL, crawler.get_user_name(), new_subjects)
+
         print(new_subjects)
 
-    time.sleep(60 * 60 * 3)  # 3분
+    time.sleep(60 * 60 * 3)  # 3시간 간격

@@ -1,0 +1,5 @@
+WEBHOOK_URL="https://discord.com/api/webhooks/XXX/YYY"
+
+USER1={"name":"홍길동","id":"gildong123","passwd":"1234"}
+USER2={"name":"김철수","id":"chulsoo99","passwd":"abcd1234"}
+USER3={"name":"이영희","id":"yhlee001","passwd":"pass123!"}

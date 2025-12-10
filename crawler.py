@@ -81,14 +81,14 @@ class Crawler:
             EC.presence_of_element_located(
                 (
                     By.XPATH,
-                    '//*[@id="Mainframe.VFrameSet.HFrameSet.LeftFrame.form.tabMenu.tabMnu.form.grdMnLeft.body.gridrow_17.cell_17_0.celltreeitem.treeitemtext:text"]',
+                    '//*[@id="Mainframe.VFrameSet.HFrameSet.LeftFrame.form.tabMenu.tabMnu.form.grdMnLeft.body.gridrow_18"]',# 18번째가 성적조회임. 2025-12-11기준 18로 변경된것으로 확인
                 )
             )
         )
 
         driver.find_element(
             By.XPATH,
-            '//*[@id="Mainframe.VFrameSet.HFrameSet.LeftFrame.form.tabMenu.tabMnu.form.grdMnLeft.body.gridrow_17.cell_17_0.celltreeitem.treeitemtext:text"]',
+            '//*[@id="Mainframe.VFrameSet.HFrameSet.LeftFrame.form.tabMenu.tabMnu.form.grdMnLeft.body.gridrow_18"]',
         ).click()
         wait = WebDriverWait(driver, 10)  # 최대 10초 대기
 
