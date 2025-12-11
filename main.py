@@ -35,28 +35,30 @@ def send_discord_message(webhook_url, user_name, subjects):
 # ================================
 # 사용자 목록 로딩 (.env 기반)
 # ================================
-user_arr = []
+def load_users():
+    users = []
+    i = 1
+    while True:
+        user_key = f"USER{i}"
+        user_json = os.getenv(user_key)
+        if user_json is None:
+            break
 
-i = 1
-while True:
-    user_key = f"USER{i}"
-    user_json = os.getenv(user_key)
-    if user_json is None:
-        break
+        try:
+            user_data = json.loads(user_json)
+        except json.JSONDecodeError:
+            print(f"{user_key} JSON 디코딩 실패")
+            i += 1
+            continue
 
-    try:
-        user_data = json.loads(user_json)
-    except json.JSONDecodeError:
-        print(f"{user_key} JSON 디코딩 실패")
+        user_name = user_data["name"]
+        user_id = user_data["id"]
+        user_passwd = user_data["passwd"]
+
+        users.append(Crawler(user_id, user_passwd, user_name))
         i += 1
-        continue
 
-    user_name = user_data["name"]
-    user_id = user_data["id"]
-    user_passwd = user_data["passwd"]
-
-    user_arr.append(Crawler(user_id, user_passwd, user_name))
-    i += 1
+    return users
 
 
 # ================================
@@ -65,15 +67,17 @@ while True:
 while True:
     print("🔍 새 데이터 확인 시작")
 
+    load_dotenv(override=True)     # .env 최신값 적용
+    user_arr = load_users()        # 최신 사용자 갱신
+
     for crawler in user_arr:
-
-        new_subjects = crawler.craw()  # 새로 생긴 과목 리스트 반환
+        new_subjects = crawler.craw()
         if new_subjects:
-            message = f"📢 **[{crawler.get_user_name()}]님! 새로운 성적이 등록되었습니다!**\n"
-            message += "\n".join(f"• {subject}" for subject in new_subjects)
-
-            send_discord_message(WEBHOOK_URL, crawler.get_user_name(), new_subjects)
-
+            send_discord_message(
+                WEBHOOK_URL,
+                crawler.get_user_name(),
+                new_subjects
+            )
         print(new_subjects)
 
-    time.sleep(60 * 60 * 3)  # 3시간 간격
+    time.sleep(60 * 60 * 3)
